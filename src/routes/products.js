@@ -36,20 +36,21 @@ const uploadCsv = multer({ storage: multer.memoryStorage() });
   }
 
   // GET /api/products
-  router.get("/", async (req, res) => {
-    try {
-      const { category, status, search } = req.query;
-      const filter = {};
-      if (category) filter.category = category;
-      if (status)   filter.status   = status;
-      if (search)   filter.$text    = { $search: search };
+ router.get("/", async (req, res) => {
+  try {
+    const { category, status, search, family } = req.query; // 👈 add family
+    const filter = {};
+    if (category) filter.category = category;
+    if (status)   filter.status   = status;
+    if (search)   filter.$text    = { $search: search };
+    if (family)   filter.family   = family;             // 👈 add this
 
-      const products = await Product.find(filter).sort({ createdAt: -1 });
-      res.json(products);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  });
+    const products = await Product.find(filter).sort({ createdAt: -1 });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
   // GET /api/products/categories/list
   router.get("/categories/list", authenticateAdmin, async (req, res) => {
@@ -90,52 +91,43 @@ router.get("/", async (req, res) => {
   }
 });
 
+// POST /api/products
+router.post(
+  "/",
+  authenticateAdmin,
+  upload.array("images", 10),
+  async (req, res) => {
+    try {
+      console.log("FILES:", req.files);
+      console.log("BODY:", req.body);
 
-router.post("/", async (req, res) => {
-  try {
-    console.log("FILES:", req.files);
-    console.log("BODY:", req.body);
+      const { name, description, price, stock, category, status, reference, family } = req.body;
 
-    const {
-      name,
-      description,
-      price,
-      stock,
-      category,
-      status,
-      reference,
-      family
-    } = req.body;
+      if (!name || price === undefined || !family) {
+        return res.status(400).json({ error: "Nom, prix et family sont requis" });
+      }
 
-   if (!name || price === undefined || !family) {
-  return res.status(400).json({
-    error: "Nom, prix et family sont requis"
-  });
-} 
+      const finalReference = reference?.trim() || generateRef(category);
 
-    const finalReference = reference?.trim() || generateRef(category);
-   
+      const images = (req.files || []).map(file => ({
+        url: file.path,
+        public_id: file.filename,
+      }));
 
-    const images = req.body.images || [];
+      const product = await Product.create({
+        name, description, price, stock,
+        category, status,
+        reference: finalReference,
+        family, images,
+      });
 
-    const product = await Product.create({
-      name,
-      description,
-      price,
-      stock,
-      category,
-      status,
-      reference: finalReference,
-      family,
-      images,
-    });
-
-    res.status(201).json(product);
-  } catch (err) {
-    console.error("FULL ERROR:", err);
-    res.status(500).json({ error: err.message });
+      res.status(201).json(product);
+    } catch (err) {
+      console.error("FULL ERROR:", err);
+      res.status(500).json({ error: err.message });
+    }
   }
-});
+);
 
   // PUT /api/products/:id
   router.put(
