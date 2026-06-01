@@ -90,41 +90,78 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-// POST /api/products
 router.post(
   "/",
   authenticateAdmin,
-  upload.array("images", 10),
-  async (req, res) => {
+  upload.array("images",10),
+  async (req,res) => {
     try {
-      console.log("FILES:", req.files);
-      console.log("BODY:", req.body);
 
-      const { name, description, price, stock, category, status, reference, family } = req.body;
+      const {
+        name,
+        description,
+        price,
+        stock,
+        category,
+        status,
+        reference,
+        family
+      } = req.body;
 
       if (!name || price === undefined || !family) {
-        return res.status(400).json({ error: "Nom, prix et family sont requis" });
+        return res.status(400).json({
+          error:"Nom, prix et family sont requis"
+        });
       }
 
-      const finalReference = reference?.trim() || generateRef(category);
+      const finalReference =
+        reference?.trim() || generateRef(category);
 
-      const images = (req.files || []).map(file => ({
-        url: file.path,
-        public_id: file.filename,
-      }));
+      let images = [];
+
+      // CAS 1 : upload fichiers
+      if (req.files?.length > 0) {
+
+        images = req.files.map(file => ({
+          filename: file.filename,
+          url: file.path,
+          public_id: file.filename
+        }));
+
+      }
+
+      // CAS 2 : JSON URLs (KaveHome / Westwing)
+      else if (req.body.images) {
+
+        images =
+          typeof req.body.images === "string"
+            ? JSON.parse(req.body.images)
+            : req.body.images;
+
+      }
 
       const product = await Product.create({
-        name, description, price, stock,
-        category, status,
+        name,
+        description,
+        price,
+        stock,
+        category,
+        status,
         reference: finalReference,
-        family, images,
+        family,
+        images
       });
 
       res.status(201).json(product);
-    } catch (err) {
-      console.error("FULL ERROR:", err);
-      res.status(500).json({ error: err.message });
+
+    } catch(err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: err.message
+      });
+
     }
   }
 );
