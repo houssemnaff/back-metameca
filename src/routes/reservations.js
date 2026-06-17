@@ -1,7 +1,7 @@
 import { Router } from "express";
 import Reservation from "../models/Reservation.js";
-import Client from "../models/Client.js";
-import Product from "../models/Product.js";
+import Client from "../models/client.js";
+import Product from "../models/product.js";
 import { authenticateAdmin, authenticateToken } from "../middleware/auth.js";
 import multer from "multer";
 import path from "path";

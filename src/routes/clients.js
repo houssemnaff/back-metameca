@@ -1,5 +1,5 @@
 import { Router } from "express";
-import Client from "../models/Client.js";
+import Client from "../models/client.js";
 import Reservation from "../models/Reservation.js";
 import { authenticateAdmin, authenticateToken } from "../middleware/auth.js";
 import bcrypt from "bcryptjs";
