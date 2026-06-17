@@ -2,6 +2,7 @@ import { Router } from "express";
 import Reservation from "../models/Reservation.js";
 import Client from "../models/client.js";
 import Product from "../models/product.js";
+import Notification from "../models/Notification.js";
 import { authenticateAdmin, authenticateToken } from "../middleware/auth.js";
 import multer from "multer";
 import path from "path";
@@ -176,7 +177,16 @@ router.post("/", authenticateAdmin , async (req, res) => {
     });
 
     const populated = await populate(Reservation.findById(reservation._id));
-    res.status(201).json(formatRes(populated));
+    const fmt = formatRes(populated);
+
+    await Notification.create({
+      type: "new_reservation",
+      title: "Nouvelle réservation",
+      message: `${fmt.client?.name ?? "Client"} a réservé ${fmt.product?.name ?? "un produit"} (x${fmt.quantity})`,
+      data: { reservationId: reservation._id },
+    });
+
+    res.status(201).json(fmt);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -210,6 +220,13 @@ router.post("/public", async (req, res) => {
       notes: notes || "",
       scheduledDate: scheduledDate || null,
       source: "public",
+    });
+
+    await Notification.create({
+      type: "new_reservation",
+      title: "Nouvelle réservation (site)",
+      message: `${clientName || clientEmail} a réservé ${product.name} (x${quantity})`,
+      data: { reservationId: reservation._id },
     });
 
     res.status(201).json({ message: "Réservation envoyée avec succès", id: reservation._id });

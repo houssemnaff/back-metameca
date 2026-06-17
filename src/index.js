@@ -10,6 +10,7 @@ import authRoutes from "./routes/auth.js";
 import productRoutes from "./routes/products.js";
 import clientRoutes from "./routes/clients.js";
 import reservationRoutes from "./routes/reservations.js";
+import notificationRoutes from "./routes/notifications.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -52,6 +53,7 @@ app.use("/api/products", (req, res, next) => {
 app.use("/api/products", productRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/reservations", reservationRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use((req, res) =>
   res.status(404).json({ error: "Route introuvable" })
