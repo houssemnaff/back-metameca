@@ -16,9 +16,21 @@ const PORT = process.env.PORT || 4000;
 
 connectDB();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://phenomenal-chimera-8b205c.netlify.app",
+];
+
 app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS bloqué pour: ${origin}`));
+    }
+  },
+  credentials: true,
 }));
 
 app.use(express.json());
