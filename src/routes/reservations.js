@@ -235,6 +235,13 @@ router.post("/public", async (req, res) => {
   }
 });
 
+const statusLabels = {
+  pending:   "en attente",
+  confirmed: "confirmée",
+  cancelled: "annulée",
+  completed: "terminée",
+};
+
 // PUT /api/reservations/:id/status
 router.put("/:id/status", authenticateAdmin , async (req, res) => {
   try {
@@ -249,6 +256,17 @@ router.put("/:id/status", authenticateAdmin , async (req, res) => {
       { new: true }
     );
     if (!r) return res.status(404).json({ error: "Réservation introuvable" });
+
+    // Notify the client about the status change
+    if (r.clientId) {
+      await Notification.create({
+        type: "status_change",
+        title: "Mise à jour de votre réservation",
+        message: `Votre réservation est maintenant ${statusLabels[status] ?? status}.`,
+        clientId: r.clientId,
+        data: { reservationId: r._id, status },
+      });
+    }
 
     const populated = await populate(Reservation.findById(r._id));
     res.json(formatRes(populated));
