@@ -65,3 +65,4 @@ app.use((err, req, res, next) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server running on PORT:", PORT);
 });
+console.log("PROCESS RUNNING ✔");
