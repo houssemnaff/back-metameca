@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 4000;
 connectDB();
 
 const allowedOrigins = [
- "https://www.metameca.tech/produits",
+ "https://www.metameca.tech",
  "https://metameca.tech"
 ];
 
