@@ -18,8 +18,10 @@ const PORT = process.env.PORT || 4000;
 connectDB();
 
 const allowedOrigins = [
- "https://www.metameca.tech",
- "https://metameca.tech"
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://phenomenal-chimera-8b205c.netlify.app",
+  "https://metamecaa.com"
 ];
 
 app.use(cors({
