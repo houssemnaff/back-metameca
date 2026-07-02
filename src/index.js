@@ -21,7 +21,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
   "https://phenomenal-chimera-8b205c.netlify.app",
-  "https://metamecaa.com"
+  "https://metamecaa.com",
+  "https://www.metamecaa.com"
 ];
 
 app.use(cors({
